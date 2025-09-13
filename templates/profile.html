@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow profile-card">
+            <div class="card-header text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user me-2"></i>My Profile
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('main.update_profile') }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ user.name }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" 
+                                       value="{{ user.email }}" disabled>
+                                <div class="form-text">Email cannot be changed</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="current_password" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="current_password" 
+                                       name="current_password" placeholder="Enter current password to change">
+                                <div class="form-text">Leave blank to keep current password</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="new_password" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="new_password" 
+                                       name="new_password" placeholder="Enter new password">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirm_password" 
+                                       name="confirm_password" placeholder="Confirm new password">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Member Since</label>
+                                <input type="text" class="form-control" 
+                                       value="{{ user.created_at if user.created_at else 'Unknown' }}" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Home
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Account Statistics -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center stats-card">
+                    <div class="card-body">
+                        <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                        <h5 class="card-title">Reviews</h5>
+                        <p class="card-text">0 reviews</p>
+                        <a href="{{ url_for('main.index') }}" class="btn btn-outline-warning btn-sm">Write Review</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center stats-card">
+                    <div class="card-body">
+                        <i class="fas fa-shopping-cart fa-2x text-success mb-2"></i>
+                        <h5 class="card-title">Orders</h5>
+                        <p class="card-text">0 orders</p>
+                        <a href="#" class="btn btn-outline-success btn-sm">View Orders</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Password validation
+document.getElementById('new_password').addEventListener('input', function() {
+    const currentPassword = document.getElementById('current_password');
+    if (this.value && !currentPassword.value) {
+        currentPassword.required = true;
+    } else if (!this.value) {
+        currentPassword.required = false;
+    }
+});
+
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const newPassword = document.getElementById('new_password');
+    if (this.value !== newPassword.value) {
+        this.setCustomValidity('Passwords do not match');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+{% endblock %}

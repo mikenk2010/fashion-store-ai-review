@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Review - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-check-circle me-2"></i>Confirm Your Review</h4>
+            </div>
+            <div class="card-body">
+                <!-- Review Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Your Review</h6>
+                        <div class="border p-3 rounded">
+                            <div class="mb-2">
+                                <strong>Rating:</strong> 
+                                {% for i in range(5) %}
+                                    {% if i < review_data.rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                ({{ review_data.rating }} stars)
+                            </div>
+                            {% if review_data.title %}
+                            <div class="mb-2">
+                                <strong>Title:</strong>
+                                <p class="mt-1 mb-0">{{ review_data.title }}</p>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <strong>Review:</strong>
+                                <p class="mt-2 mb-0">{{ review_data.text }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>AI Analysis</h6>
+                        <div class="border p-3 rounded">
+                            <!-- Ensemble Prediction -->
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-{{ 'success' if review_data.ml_prediction else 'danger' }} me-2">
+                                        {{ 'Recommended' if review_data.ml_prediction else 'Not Recommended' }}
+                                    </span>
+                                    <span class="fw-bold">Ensemble Prediction</span>
+                                </div>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-{{ 'success' if review_data.ml_prediction else 'danger' }}" 
+                                         role="progressbar" style="width: {{ review_data.ml_confidence * 100 }}%"></div>
+                                </div>
+                                <small class="text-muted">Confidence: {{ "%.1f"|format(review_data.ml_confidence * 100) }}%</small>
+                            </div>
+                            
+                            <!-- Individual Model Results -->
+                            {% if review_data.ml_details and review_data.ml_details.individual_results %}
+                            <div>
+                                <h6 class="mb-2">Individual Model Results:</h6>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <div class="text-center">
+                                            <div class="badge bg-info mb-1">Logistic Regression</div>
+                                            <div class="small">
+                                                {{ review_data.ml_details.individual_results.logistic_regression.label }}
+                                            </div>
+                                            <div class="small text-muted">
+                                                ({{ "%.0f"|format(review_data.ml_details.individual_results.logistic_regression.confidence * 100) }}%)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-center">
+                                            <div class="badge bg-warning mb-1">Random Forest</div>
+                                            <div class="small">
+                                                {{ review_data.ml_details.individual_results.random_forest.label }}
+                                            </div>
+                                            <div class="small text-muted">
+                                                ({{ "%.0f"|format(review_data.ml_details.individual_results.random_forest.confidence * 100) }}%)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-center">
+                                            <div class="badge bg-secondary mb-1">SVM</div>
+                                            <div class="small">
+                                                {{ review_data.ml_details.individual_results.svm.label }}
+                                            </div>
+                                            <div class="small text-muted">
+                                                ({{ "%.0f"|format(review_data.ml_details.individual_results.svm.confidence * 100) }}%)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if review_data.ml_details.consensus %}
+                                <div class="mt-2 text-center">
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>All models agree
+                                    </span>
+                                </div>
+                                {% else %}
+                                <div class="mt-2 text-center">
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Models disagree - using majority vote
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Confirmation Form -->
+                <form method="POST" action="{{ url_for('main.confirm_review') }}">
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            <h6><i class="fas fa-user-check me-2"></i>Your Decision</h6>
+                        </div>
+                        <div class="card-body">
+                            <!-- Accept AI Prediction -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="decision" 
+                                           id="accept_ai" value="accept" checked>
+                                    <label class="form-check-label" for="accept_ai">
+                                        <i class="fas fa-robot text-primary me-1"></i>
+                                        <strong>I agree with the AI prediction</strong>
+                                        <small class="text-muted d-block">
+                                            {{ 'Recommended' if review_data.ml_prediction else 'Not Recommended' }} 
+                                            ({{ "%.1f"|format(review_data.ml_confidence * 100) }}% confidence)
+                                        </small>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Override AI Prediction -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="decision" 
+                                           id="override_ai" value="override">
+                                    <label class="form-check-label" for="override_ai">
+                                        <i class="fas fa-user-edit text-warning me-1"></i>
+                                        <strong>I want to override the AI prediction</strong>
+                                        <small class="text-muted d-block">Choose your own recommendation</small>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Override Options (hidden by default) -->
+                            <div id="override_options" class="mb-3" style="display: none;">
+                                <div class="border-start border-warning border-3 ps-3">
+                                    <label class="form-label">Your Recommendation:</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="override_decision" 
+                                                       id="override_recommended" value="recommended">
+                                                <label class="form-check-label" for="override_recommended">
+                                                    <i class="fas fa-thumbs-up text-success me-1"></i>
+                                                    <strong>Recommended</strong>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="override_decision" 
+                                                       id="override_not_recommended" value="not_recommended">
+                                                <label class="form-check-label" for="override_not_recommended">
+                                                    <i class="fas fa-thumbs-down text-danger me-1"></i>
+                                                    <strong>Not Recommended</strong>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <label for="override_reason" class="form-label">
+                                            Why do you disagree with the AI prediction? (Optional)
+                                        </label>
+                                        <textarea class="form-control" id="override_reason" name="override_reason" rows="3" 
+                                                  placeholder="Explain your reasoning..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ url_for('main.product_detail', clothing_id=review_data.clothing_id) }}" 
+                                   class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Back to Product
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check me-1"></i>Confirm Review
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- AI Explanation -->
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>About AI Predictions</h6>
+                        <p class="mb-2">Our AI system uses three machine learning models to analyze your review:</p>
+                        <ul class="mb-0">
+                            <li><strong>Logistic Regression:</strong> Analyzes word patterns using Bag-of-Words features</li>
+                            <li><strong>Random Forest:</strong> Uses semantic embeddings to understand meaning</li>
+                            <li><strong>SVM:</strong> Combines TF-IDF weighted embeddings for nuanced analysis</li>
+                        </ul>
+                        <p class="mt-2 mb-0">The final prediction is determined by majority vote, and you can always override the AI's decision based on your own judgment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const acceptRadio = document.getElementById('accept_ai');
+    const overrideRadio = document.getElementById('override_ai');
+    const overrideOptions = document.getElementById('override_options');
+    const form = document.querySelector('form');
+    
+    function toggleOverrideOptions() {
+        if (overrideRadio.checked) {
+            overrideOptions.style.display = 'block';
+        } else {
+            overrideOptions.style.display = 'none';
+        }
+    }
+    
+    acceptRadio.addEventListener('change', toggleOverrideOptions);
+    overrideRadio.addEventListener('change', toggleOverrideOptions);
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        if (overrideRadio.checked) {
+            const overrideDecision = document.querySelector('input[name="override_decision"]:checked');
+            if (!overrideDecision) {
+                e.preventDefault();
+                alert('Please select your recommendation when overriding the AI prediction.');
+                return false;
+            }
+        }
+    });
+    
+    // Initial call
+    toggleOverrideOptions();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,487 @@
+{% extends "base.html" %}
+
+{% block title %}Fashion Store - Browse Products{% endblock %}
+
+{% block content %}
+<!-- Statistics Dashboard -->
+<div class="row mb-4" id="statsDashboard">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 id="totalProducts">{{ total_matches }}</h4>
+                        <p class="mb-0">Total Products</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-box fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 id="totalReviews">{{ total_reviews }}</h4>
+                        <p class="mb-0">Total Reviews</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-comments fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 id="avgRating">{{ "%.1f"|format(overall_avg_rating) }}</h4>
+                        <p class="mb-0">Avg Rating</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 id="categories">{{ categories|length }}</h4>
+                        <p class="mb-0">Categories</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tags fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Sidebar Filters -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter me-2"></i>Filters</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('main.index') }}" id="filterForm">
+                    <!-- Search -->
+                    <div class="mb-3">
+                        <label for="search" class="form-label">Search Products</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ request.args.get('search', '') }}" 
+                               placeholder="Try: dress, dresses, shirt, tops...">
+                        <div class="form-text">
+                            <small class="text-muted">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                Tip: Search works with singular/plural forms (dress = dresses)
+                            </small>
+                        </div>
+                    </div>
+                    
+                     <!-- Category Filter -->
+                     <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>
+                                    {{ category }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Division Filter -->
+                    <div class="mb-3">
+                        <label for="division" class="form-label">Division</label>
+                        <select class="form-select" id="division" name="division">
+                            <option value="">All Divisions</option>
+                            {% for div in divisions %}
+                                <option value="{{ div }}" {% if selected_division == div %}selected{% endif %}>
+                                    {{ div }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Department Filter -->
+                    <div class="mb-3">
+                        <label for="department" class="form-label">Department</label>
+                        <select class="form-select" id="department" name="department">
+                            <option value="">All Departments</option>
+                            {% for dept in departments %}
+                                <option value="{{ dept }}" {% if selected_department == dept %}selected{% endif %}>
+                                    {{ dept }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Class Filter -->
+                    <div class="mb-3">
+                        <label for="class_name" class="form-label">Class</label>
+                        <select class="form-select" id="class_name" name="class_name">
+                            <option value="">All Classes</option>
+                            {% for cls in classes %}
+                                <option value="{{ cls }}" {% if selected_class == cls %}selected{% endif %}>
+                                    {{ cls }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>                                
+                    
+                    <!-- Rating Filter -->
+                    <div class="mb-3">
+                        <label for="min_rating" class="form-label">Minimum Rating</label>
+                        <select class="form-select" id="min_rating" name="min_rating">
+                            <option value="">Any Rating</option>
+                            <option value="1">1+ Stars</option>
+                            <option value="2">2+ Stars</option>
+                            <option value="3">3+ Stars</option>
+                            <option value="4">4+ Stars</option>
+                            <option value="5">5 Stars Only</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Sort Options -->
+                    <div class="mb-3">
+                        <label for="sort" class="form-label">Sort By</label>
+                        <select class="form-select" id="sort" name="sort">
+                            <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Newest First</option>
+                            <option value="title" {% if current_sort == 'title' %}selected{% endif %}>Name A-Z</option>
+                            <option value="avg_rating" {% if current_sort == 'avg_rating' %}selected{% endif %}>Rating</option>
+                            <option value="review_count" {% if current_sort == 'review_count' %}selected{% endif %}>Most Reviewed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="order" class="form-label">Order</label>
+                        <select class="form-select" id="order" name="order">
+                            <option value="desc" {% if current_order == 'desc' %}selected{% endif %}>Descending</option>
+                            <option value="asc" {% if current_order == 'asc' %}selected{% endif %}>Ascending</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i>Apply Filters
+                        </button>
+                        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Clear All
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-chart-bar me-2"></i>Quick Stats</h6>
+            </div>
+            <div class="card-body">
+                <div id="quickStats">
+                    <div class="text-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 mb-0">Loading statistics...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products Grid -->
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Our Products</h2>
+            <div class="d-flex align-items-center">
+                {% if search %}
+                    <span class="text-muted me-3">
+                        <strong>{{ total_matches }}</strong> clothing items matched your search for "<strong>{{ search }}</strong>"
+                        {% if products|length < total_matches %}
+                            (showing {{ products|length }} of {{ total_matches }})
+                        {% endif %}
+                    </span>
+                {% else %}
+                    <span class="text-muted me-3">{{ products|length }} products found</span>
+                {% endif %}
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" id="gridView">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="listView">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        {% if products %}
+            <div class="row" id="productsContainer">
+                {% for product in products %}
+                <div class="col-lg-4 col-md-6 mb-4 product-item">
+                    <div class="card h-100 product-card">
+                        <div class="position-relative">
+                            {% if product.local_image_path %}
+                            <img src="/static/{{ product.local_image_path }}" class="card-img-top" alt="{{ product.title }}" 
+                                 style="height: 250px; object-fit: cover;">
+                            {% elif product.image_url %}
+                            <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.title }}" 
+                                 style="height: 250px; object-fit: cover;">
+                            {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                 style="height: 250px;">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                            </div>
+                            {% endif %}
+                            
+                            
+                            <!-- Category Badge -->
+                            <div class="position-absolute top-0 start-0 p-2">
+                                <span class="badge bg-primary">{{ product.class_name }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ product.title }}</h5>
+                            <p class="card-text text-muted">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                            
+                            <div class="mt-auto">
+                                <!-- Rating -->
+                                <div class="mb-2">
+                                    {% for i in range(5) %}
+                                        {% if i < product.avg_rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ms-2 text-muted">({{ product.review_count }} reviews)</span>
+                                </div>
+                                
+                                <!-- Category Badge -->
+                                <span class="badge bg-secondary mb-2">{{ product.department_name }}</span>
+                                
+                                <!-- Product Info -->
+                                <div class="text-muted small mb-3">
+                                    <div><strong>Division:</strong> {{ product.division_name }}</div>
+                                    <div><strong>Class:</strong> {{ product.class_name }}</div>
+                                </div>
+                                
+                                <!-- AI Insights -->
+                                {% if product.reviews %}
+                                <div class="mb-3">
+                                    <small class="text-info">
+                                        <i class="fas fa-robot me-1"></i>
+                                        AI analyzed {{ product.reviews|length }} reviews
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <a href="{{ url_for('main.product_detail', clothing_id=product.clothing_id) }}" 
+                               class="btn btn-primary">
+                                <i class="fas fa-eye me-1"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination Info -->
+            {% if total_pages > 1 %}
+            <div class="row mb-3">
+                <div class="col-12 text-center">
+                    <p class="text-muted">
+                        Showing page {{ page }} of {{ total_pages }} 
+                        ({{ products|length }} of {{ total_matches }} products)
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            <nav aria-label="Products pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.index', page=page-1, search=search, division=selected_division, department=selected_department, class=selected_class, category=selected_category, min_rating=selected_min_rating, sort=current_sort, order=current_order) }}">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for p in range(1, total_pages + 1) %}
+                        {% if p == page %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ p }}</span>
+                            </li>
+                        {% elif p <= 3 or p > total_pages - 3 or (p >= page - 2 and p <= page + 2) %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('main.index', page=p, search=search, division=selected_division, department=selected_department, class=selected_class, category=selected_category, min_rating=selected_min_rating, sort=current_sort, order=current_order) }}">{{ p }}</a>
+                            </li>
+                        {% elif p == 4 or p == total_pages - 3 %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.index', page=page+1, search=search, division=selected_division, department=selected_department, class=selected_class, category=selected_category, min_rating=selected_min_rating, sort=current_sort, order=current_order) }}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>No products found</h4>
+                <p class="text-muted">Try adjusting your filters or search terms.</p>
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">Clear Filters</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load statistics on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadStatistics();
+    loadFilterOptions();
+    setupViewToggle();
+});
+
+function loadStatistics() {
+    fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error loading stats:', data.error);
+                return;
+            }
+            
+            // Update dashboard
+            document.getElementById('totalProducts').textContent = data.total_products || 0;
+            document.getElementById('totalReviews').textContent = data.total_reviews || 0;
+            
+            // Calculate average rating
+            if (data.rating_distribution && data.rating_distribution.length > 0) {
+                let totalRating = 0;
+                let totalCount = 0;
+                data.rating_distribution.forEach(item => {
+                    totalRating += item._id * item.count;
+                    totalCount += item.count;
+                });
+                const avgRating = totalCount > 0 ? (totalRating / totalCount).toFixed(1) : '0.0';
+                document.getElementById('avgRating').textContent = avgRating;
+            } else {
+                document.getElementById('avgRating').textContent = '0.0';
+            }
+            
+            // Update categories count
+            document.getElementById('categories').textContent = data.categories ? data.categories.length : 0;
+            
+            // Update quick stats
+            updateQuickStats(data);
+        })
+        .catch(error => {
+            console.error('Error loading statistics:', error);
+        });
+}
+
+function updateQuickStats(data) {
+    const quickStatsDiv = document.getElementById('quickStats');
+    
+    if (data.categories && data.categories.length > 0) {
+        const topCategories = data.categories.slice(0, 3);
+        let html = '<h6>Top Categories:</h6>';
+        topCategories.forEach(cat => {
+            html += `<div class="d-flex justify-content-between mb-1">
+                        <small>${cat._id}</small>
+                        <small class="text-muted">${cat.count}</small>
+                     </div>`;
+        });
+        quickStatsDiv.innerHTML = html;
+    } else {
+        quickStatsDiv.innerHTML = '<p class="text-muted mb-0">No data available</p>';
+    }
+}
+
+function loadFilterOptions() {
+    // Load divisions and classes for filter dropdowns
+    fetch('/api/products')
+        .then(response => response.json())
+        .then(products => {
+            const divisions = [...new Set(products.map(p => p.division_name))].sort();
+            const classes = [...new Set(products.map(p => p.class_name))].sort();
+            
+            // Populate division dropdown
+            const divisionSelect = document.getElementById('division');
+            divisions.forEach(div => {
+                const option = document.createElement('option');
+                option.value = div;
+                option.textContent = div;
+                divisionSelect.appendChild(option);
+            });
+            
+            // Populate class dropdown
+            const classSelect = document.getElementById('class_name');
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls;
+                option.textContent = cls;
+                classSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading filter options:', error);
+        });
+}
+
+function setupViewToggle() {
+    const gridView = document.getElementById('gridView');
+    const listView = document.getElementById('listView');
+    const productsContainer = document.getElementById('productsContainer');
+    
+    gridView.addEventListener('click', function() {
+        gridView.classList.add('active');
+        listView.classList.remove('active');
+        productsContainer.className = 'row';
+    });
+    
+    listView.addEventListener('click', function() {
+        listView.classList.add('active');
+        gridView.classList.remove('active');
+        productsContainer.className = 'row';
+        productsContainer.querySelectorAll('.product-item').forEach(item => {
+            item.className = 'col-12 mb-3 product-item';
+        });
+    });
+}
+
+// Auto-submit form on filter change
+document.getElementById('filterForm').addEventListener('change', function() {
+    this.submit();
+});
+</script>
+{% endblock %}

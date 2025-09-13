@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.title }} - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Product Image -->
+    <div class="col-md-4">
+        <div class="card">
+            <!-- Product Image-->
+            <div class="position-relative">
+                {% if product.local_image_path %}
+                <img src="/static/{{ product.local_image_path }}" class="card-img-top" 
+                     alt="{{ product.title }}" style="height: 400px; object-fit: cover;">
+                {% elif product.image_url %}
+                <img src="{{ product.image_url }}" class="card-img-top" 
+                     alt="{{ product.title }}" style="height: 400px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                     style="height: 400px;">
+                    <i class="fas fa-image fa-4x text-muted"></i>
+                </div>
+                {% endif %}
+                
+                
+                <!-- Category Badge -->
+                <div class="position-absolute top-0 start-0 p-2">
+                    <span class="badge bg-primary fs-6">{{ product.class_name }}</span>
+                </div>
+            </div>
+            <!--END Product Image-->
+        </div>
+
+        <!-- Reviews Sidebar -->
+        <!-- Recommended Reviews -->
+        {% if product.recommended_reviews %}
+        <div class="card mb-4 mt-4">
+            <div class="card-header bg-success text-white">
+                <h6><i class="fas fa-thumbs-up me-2"></i>Recommended Reviews ({{ product.recommended_reviews|length }})</h6>
+            </div>
+            <div class="card-body">
+                {% for review in product.recommended_reviews[:5] %}
+                <div class="review-item mb-3 pb-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            {% for i in range(5) %}
+                                {% if i < review.rating %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-warning"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">{{ review.created_at[:10] if review.created_at else 'N/A' }}</small>
+                    </div>
+                    
+                    {% if review.title %}
+                    <h6 class="mb-1">{{ review.title }}</h6>
+                    {% endif %}
+                    
+                    <p class="mb-1">{{ review.text[:150] }}{% if review.text|length > 150 %}...{% endif %}</p>
+                    
+                    {% if review.ml_details %}
+                    <div class="mt-2">
+                        <small class="text-info">
+                            <i class="fas fa-robot me-1"></i>AI Analysis:
+                        </small>
+                        <div class="mt-1">
+                            <span class="badge bg-{{ 'success' if review.ml_prediction else 'danger' }} me-1">
+                                {{ 'Recommended' if review.ml_prediction else 'Not Recommended' }}
+                            </span>
+                            <small class="text-muted">({{ "%.1f"|format(review.ml_confidence * 100) }}% confidence)</small>
+                        </div>
+                        {% if review.ml_details.individual_results %}
+                        <div class="mt-1">
+                            <small class="text-muted">
+                                LR: {{ review.ml_details.individual_results.logistic_regression.label }} | 
+                                RF: {{ review.ml_details.individual_results.random_forest.label }} | 
+                                SVM: {{ review.ml_details.individual_results.svm.label }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        {% if review.user_override is defined and review.user_override %}
+                        <div class="mt-1">
+                            <span class="badge bg-warning">User Override</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Not Recommended Reviews -->
+        {% if product.not_recommended_reviews %}
+        <div class="card mt-4">
+            <div class="card-header bg-danger text-white">
+                <h6><i class="fas fa-thumbs-down me-2"></i>Not Recommended Reviews ({{ product.not_recommended_reviews|length }})</h6>
+            </div>
+            <div class="card-body">
+                {% for review in product.not_recommended_reviews[:5] %}
+                <div class="review-item mb-3 pb-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            {% for i in range(5) %}
+                                {% if i < review.rating %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-warning"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">{{ review.created_at[:10] if review.created_at else 'N/A' }}</small>
+                    </div>
+                    
+                    {% if review.title %}
+                    <h6 class="mb-1">{{ review.title }}</h6>
+                    {% endif %}
+                    
+                    <p class="mb-1">{{ review.text[:150] }}{% if review.text|length > 150 %}...{% endif %}</p>
+                    
+                    {% if review.ml_details %}
+                    <div class="mt-2">
+                        <small class="text-info">
+                            <i class="fas fa-robot me-1"></i>AI Analysis:
+                        </small>
+                        <div class="mt-1">
+                            <span class="badge bg-{{ 'success' if review.ml_prediction else 'danger' }} me-1">
+                                {{ 'Recommended' if review.ml_prediction else 'Not Recommended' }}
+                            </span>
+                            <small class="text-muted">({{ "%.1f"|format(review.ml_confidence * 100) }}% confidence)</small>
+                        </div>
+                        {% if review.ml_details.individual_results %}
+                        <div class="mt-1">
+                            <small class="text-muted">
+                                LR: {{ review.ml_details.individual_results.logistic_regression.label }} | 
+                                RF: {{ review.ml_details.individual_results.random_forest.label }} | 
+                                SVM: {{ review.ml_details.individual_results.svm.label }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        {% if review.user_override is defined and review.user_override %}
+                        <div class="mt-1">
+                            <span class="badge bg-warning">User Override</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- No Reviews Message -->
+        {% if not product.recommended_reviews and not product.not_recommended_reviews %}
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                <h6>No reviews yet</h6>
+                <p class="text-muted">Be the first to review this product!</p>
+            </div>
+        </div>
+        {% endif %}
+
+
+    </div>
+    
+    <!-- Product Info -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">{{ product.title }}</h1>
+                
+                <!-- Rating -->
+                <div class="mb-3">
+                    {% for i in range(5) %}
+                        {% if i < product.avg_rating %}
+                            <i class="fas fa-star text-warning"></i>
+                        {% else %}
+                            <i class="far fa-star text-warning"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span class="ms-2">{{ "%.1f"|format(product.avg_rating) }} ({{ product.review_count }} reviews)</span>
+                </div>
+                
+                <!-- Product Details -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Product Information</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Division:</strong> {{ product.division_name }}</li>
+                            <li><strong>Department:</strong> {{ product.department_name }}</li>
+                            <li><strong>Class:</strong> {{ product.class_name }}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="mb-4">
+                    <h5>Description</h5>
+                    <p class="text-muted">{{ product.description }}</p>
+                </div>
+                
+                <!-- Write Review Form with Real-time Prediction -->
+                <div class="card bg-light">
+                    <div class="card-header">
+                        <h5><i class="fas fa-pen me-2"></i>Write a Review</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if not session.user_id %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Please <a href="{{ url_for('auth.login') }}" class="alert-link">login</a> or 
+                            <a href="{{ url_for('auth.register') }}" class="alert-link">register</a> to write a review.
+                        </div>
+                        {% else %}
+                        <form method="POST" action="{{ url_for('main.submit_review', clothing_id=product.clothing_id) }}" id="reviewForm">
+                            <div class="mb-3">
+                                <label for="rating" class="form-label">Rating *</label>
+                                <select class="form-select" id="rating" name="rating" required>
+                                    <option value="">Select a rating</option>
+                                    <option value="1">1 Star - Poor</option>
+                                    <option value="2">2 Stars - Fair</option>
+                                    <option value="3">3 Stars - Good</option>
+                                    <option value="4">4 Stars - Very Good</option>
+                                    <option value="5">5 Stars - Excellent</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Review Title</label>
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       placeholder="Give your review a title (optional)">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="review_text" class="form-label">Review Text *</label>
+                                <textarea class="form-control" id="review_text" name="review_text" rows="4" 
+                                          placeholder="Share your thoughts about this product..." required></textarea>
+                                
+                                <!-- Real-time Prediction Display -->
+                                <div id="predictionResult" class="mt-3" style="display: none;">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6><i class="fas fa-robot me-2"></i>AI Prediction</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <span class="badge bg-{{ 'success' if 'Recommended' else 'danger' }}" id="predictionBadge">
+                                                            Loading...
+                                                        </span>
+                                                        <span class="ms-2" id="predictionLabel">Analyzing...</span>
+                                                    </div>
+                                                    <div class="progress mb-2">
+                                                        <div class="progress-bar" id="confidenceBar" role="progressbar" style="width: 0%"></div>
+                                                    </div>
+                                                    <small class="text-muted">Confidence: <span id="confidenceValue">0%</span></small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>Individual Model Results:</h6>
+                                                    <div id="individualResults">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <small>Logistic Regression:</small>
+                                                            <small id="lrResult">-</small>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <small>Random Forest:</small>
+                                                            <small id="rfResult">-</small>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <small>SVM:</small>
+                                                            <small id="svmResult">-</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Submit Review
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+</div>
+
+<!-- Back to Products -->
+<div class="mt-4">
+    <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Products
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Real-time prediction functionality
+let predictionTimeout;
+
+document.getElementById('review_text').addEventListener('input', function() {
+    const reviewText = this.value.trim();
+    
+    // Clear previous timeout
+    if (predictionTimeout) {
+        clearTimeout(predictionTimeout);
+    }
+    
+    // Show loading state
+    if (reviewText.length > 10) {
+        document.getElementById('predictionResult').style.display = 'block';
+        document.getElementById('predictionLabel').textContent = 'Analyzing...';
+        document.getElementById('confidenceValue').textContent = '0%';
+        document.getElementById('confidenceBar').style.width = '0%';
+        document.getElementById('confidenceBar').className = 'progress-bar';
+        
+        // Set timeout for API call
+        predictionTimeout = setTimeout(() => {
+            predictReview(reviewText);
+        }, 1000); // Wait 1 second after user stops typing
+    } else {
+        document.getElementById('predictionResult').style.display = 'none';
+    }
+});
+
+function predictReview(reviewText) {
+    fetch('/api/predict_review', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            review_text: reviewText
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error('Prediction error:', data.error);
+            return;
+        }
+        
+        // Update prediction display
+        const prediction = data.prediction;
+        const confidence = data.confidence;
+        const label = data.label;
+        
+        // Update badge and label
+        const badge = document.getElementById('predictionBadge');
+        const predictionLabel = document.getElementById('predictionLabel');
+        const confidenceValue = document.getElementById('confidenceValue');
+        const confidenceBar = document.getElementById('confidenceBar');
+        
+        badge.textContent = label;
+        badge.className = `badge bg-${prediction ? 'success' : 'danger'}`;
+        predictionLabel.textContent = label;
+        confidenceValue.textContent = `${(confidence * 100).toFixed(1)}%`;
+        confidenceBar.style.width = `${confidence * 100}%`;
+        confidenceBar.className = `progress-bar bg-${prediction ? 'success' : 'danger'}`;
+        
+        // Update individual model results
+        if (data.details && data.details.individual_results) {
+            const lr = data.details.individual_results.logistic_regression;
+            const rf = data.details.individual_results.random_forest;
+            const svm = data.details.individual_results.svm;
+            
+            document.getElementById('lrResult').textContent = `${lr.label} (${(lr.confidence * 100).toFixed(0)}%)`;
+            document.getElementById('rfResult').textContent = `${rf.label} (${(rf.confidence * 100).toFixed(0)}%)`;
+            document.getElementById('svmResult').textContent = `${svm.label} (${(svm.confidence * 100).toFixed(0)}%)`;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('predictionLabel').textContent = 'Error analyzing review';
+    });
+}
+</script>
+{% endblock %}

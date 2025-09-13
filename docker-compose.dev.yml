@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7.0
+    container_name: fashion_store_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: ecommerce_db
+    volumes:
+      - mongo_data:/data/db
+      - ./src/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - fashion_store_network
+
+  # ML Model Training Service (runs once)
+  trainer:
+    build: .
+    container_name: fashion_store_trainer
+    environment:
+      - MONGO_URI=mongodb://admin:password123@mongo:27017/ecommerce_db?authSource=admin
+    depends_on:
+      - mongo
+    volumes:
+      - ./data:/app/data:ro
+      - ./models:/app/models
+    networks:
+      - fashion_store_network
+    command: >
+      sh -c "
+        echo 'Waiting for MongoDB to be ready...' &&
+        sleep 20 &&
+        echo 'Training ML models...' &&
+        python -m src.models.train_models &&
+        echo 'Model training completed!'
+      "
+    profiles:
+      - training
+
+  # Flask Application (Development Mode with Live Sync)
+  web:
+    build: .
+    container_name: fashion_store_web
+    restart: unless-stopped
+    ports:
+      - "6600:6600"
+    environment:
+      - MONGO_URI=mongodb://admin:password123@mongo:27017/ecommerce_db?authSource=admin
+      - FLASK_ENV=development  # Changed to development for auto-reload
+      - FLASK_DEBUG=1
+      - HOST=0.0.0.0
+      - PORT=6600
+    depends_on:
+      - mongo
+    volumes:
+      # Live sync for development - any local changes will appear in container
+      - .:/app  # Mount the entire project directory for live sync
+      - ./data:/app/data:ro
+      - ./models:/app/models
+      - ./.env:/app/.env:ro
+      - ./logs:/app/logs  # Mount logs directory for persistence
+    networks:
+      - fashion_store_network
+    command: >
+      sh -c "
+        echo 'Waiting for MongoDB to be ready...' &&
+        sleep 10 &&
+        echo 'Loading data and starting application...' &&
+        python -m src.utils.database &&
+        python main.py
+      "
+
+volumes:
+  mongo_data:
+
+networks:
+  fashion_store_network:
+    driver: bridge
