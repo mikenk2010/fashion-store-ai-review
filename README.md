@@ -4,6 +4,18 @@ A sophisticated Flask web application with ML-powered review classification, bui
 
 ## Quick Start
 
+- Homepage
+
+![Home Page](./documents/screenshots/homepage.png)
+
+- Review
+
+![Review](./documents/screenshots/review.png)
+
+![Review](./documents/screenshots/product-review-ai-rating.png)
+
+![Review](./documents/screenshots/product-review-ai-rating-confirm.png)
+
 ### Prerequisites
 - Docker and Docker Compose
 - Git
