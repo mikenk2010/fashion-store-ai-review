@@ -28,8 +28,8 @@ A sophisticated Flask web application with ML-powered review classification, bui
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd asm3-online-shopping
+   git clone https://github.com/mikenk2010/fashion-store-ai-review
+   cd fashion-store-ai-review
    ```
 
 2. **Start the application**
