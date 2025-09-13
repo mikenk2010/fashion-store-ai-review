@@ -4,6 +4,10 @@ A sophisticated Flask web application with ML-powered review classification, bui
 
 ## Quick Start
 
+- Video
+
+![Video Walkthru](./documents/screenshots/demo-shopping-review.gif)
+
 - Homepage
 
 ![Home Page](./documents/screenshots/homepage.png)
