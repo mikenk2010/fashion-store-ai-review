@@ -1,5 +1,32 @@
 """
-Authentication routes
+Authentication routes for Fashion Store application
+
+This module handles all user authentication-related routes including
+login, registration, logout, and profile management. It provides
+secure user session management and integrates with the application's
+logging system for audit trails.
+
+Key Features:
+- User registration with email validation
+- Secure login with password verification
+- Session management and user state tracking
+- Profile management and password updates
+- Comprehensive logging for security auditing
+- Input validation and error handling
+
+Authentication Flow:
+1. User registration with email/password validation
+2. Secure login with session creation
+3. Session-based authentication for protected routes
+4. Profile management for authenticated users
+5. Secure logout with session cleanup
+
+Security Features:
+- Password hashing using SHA-256
+- Session-based authentication
+- Input validation and sanitization
+- Comprehensive audit logging
+- CSRF protection through Flask sessions
 
 Authors: 
 - Hoang Chau Le <s3715228@rmit.edu.vn>
@@ -14,36 +41,70 @@ from ...utils.auth import hash_password, verify_password, login_required, get_cu
 from ...config.logging_config import log_user_action, log_database_operation
 from datetime import datetime
 
+# Create Blueprint for authentication routes
+# This organizes all auth-related routes under the /auth prefix
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """User login"""
+    """
+    User login route
+    
+    This route handles user authentication for the Fashion Store application.
+    It supports both GET (display login form) and POST (process login) methods.
+    
+    Login Process:
+    1. Validate input fields (email and password)
+    2. Query database for user by email
+    3. Verify password using secure hashing
+    4. Create user session if authentication succeeds
+    5. Log authentication attempt for security auditing
+    6. Redirect to appropriate page based on result
+    
+    Security Features:
+    - Input validation and sanitization
+    - Secure password verification
+    - Session management
+    - Comprehensive audit logging
+    - Error handling without information disclosure
+    
+    Returns:
+        str: Rendered login template or redirect response
+    """
     if request.method == 'POST':
+        # Extract and sanitize form data
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
         
+        # Validate required fields
         if not email or not password:
             flash('Please fill in all fields.', 'error')
             return render_template('login.html')
         
+        # Get database connection and access users collection
         db = get_database_connection()
         users_collection = db.users
         
+        # Find user by email address
         user = users_collection.find_one({'email': email})
         
+        # Verify password and authenticate user
         if user and verify_password(password, user['password']):
+            # Create user session with essential information
             session['user_id'] = str(user['_id'])
             session['user_name'] = user['name']
             session['user_email'] = user['email']
             
+            # Log successful login for security auditing
             log_user_action('login', str(user['_id']), {'email': email}, True)
             flash(f'Welcome back, {user["name"]}!', 'success')
             return redirect(url_for('main.index'))
         else:
+            # Log failed login attempt for security monitoring
             log_user_action('login_failed', None, {'email': email}, False)
             flash('Invalid email or password.', 'error')
     
+    # Display login form for GET requests
     return render_template('login.html')
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
