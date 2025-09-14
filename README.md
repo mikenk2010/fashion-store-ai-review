@@ -191,7 +191,7 @@ For detailed architecture documentation, see [ARCHITECTURE.md](documents/ARCHITE
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/mikenk2010/fashion-store-ai-review asm3-online-shopping
    cd asm3-online-shopping
    ```
 
