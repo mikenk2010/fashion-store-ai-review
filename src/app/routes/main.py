@@ -1,5 +1,29 @@
 """
-Main application routes
+Main application routes for the Fashion Store e-commerce application.
+
+This module contains all the primary web routes that handle user interactions
+with the Fashion Store application. It includes routes for product browsing,
+product details, review submission, and user authentication flows.
+
+The routes implement a comprehensive e-commerce experience with:
+- Product listing with advanced search and filtering
+- Product detail pages with review management
+- Review submission with AI-powered prediction
+- User authentication and session management
+- Review confirmation and override functionality
+
+Key Features:
+- Advanced search algorithm with keyword normalization
+- Server-side pagination for performance
+- Real-time ML prediction integration
+- User override system for AI recommendations
+- Comprehensive error handling and validation
+
+Authors: 
+- Hoang Chau Le <s3715228@rmit.edu.vn>
+- Bao Nguyen <s4139514@rmit.edu.vn>
+
+Version: 1.0.0
 """
 
 from flask import Blueprint, render_template, request, session, flash, redirect, url_for
@@ -8,15 +32,51 @@ from ...utils.database import get_database_connection
 from ...utils.auth import login_required, get_current_user
 from ...utils.helpers import get_review_stats
 
+# Create Blueprint for main application routes
+# Blueprints allow for modular organization of routes and views
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index():
-    """Homepage with product listings"""
+    """
+    Homepage route displaying product listings with advanced search and filtering.
+    
+    This route serves as the main entry point for the Fashion Store application.
+    It provides a comprehensive product browsing experience with:
+    - Advanced search functionality with keyword normalization
+    - Multi-dimensional filtering (division, department, class, category, rating)
+    - Server-side pagination for optimal performance
+    - Real-time statistics and analytics
+    - Responsive design for all device types
+    
+    The search algorithm implements intelligent keyword matching that handles:
+    - Plural/singular form variations (dress/dresses, shirt/shirts)
+    - Case-insensitive matching across multiple fields
+    - Partial word matching with regex patterns
+    - Multi-field search across title, description, and metadata
+    
+    Query Parameters:
+        search (str): Search keywords for product matching
+        division (str): Filter by product division (e.g., 'General')
+        department (str): Filter by department (e.g., 'Dresses', 'Tops')
+        class (str): Filter by product class
+        category (str): Filter by product category
+        min_rating (float): Minimum average rating filter
+        page (int): Page number for pagination (default: 1)
+    
+    Returns:
+        str: Rendered HTML template with product listings and filters
+    
+    Raises:
+        DatabaseError: If database connection or query fails
+        TemplateError: If template rendering fails
+    """
+    # Establish database connection
     db = get_database_connection()
     products_collection = db.products
     
-    # Get filter parameters
+    # Extract and sanitize filter parameters from URL query string
+    # All parameters are optional and have sensible defaults
     search = request.args.get('search', '').strip()
     division = request.args.get('division', '')
     department = request.args.get('department', '')
@@ -24,26 +84,33 @@ def index():
     category = request.args.get('category', '')
     min_rating = request.args.get('min_rating', '')
     
-    # Build query with enhanced search algorithm
+    # Initialize MongoDB query object for building dynamic filters
+    # This approach allows for flexible query construction based on user input
     query = {}
+    
+    # Implement enhanced search algorithm with keyword normalization
     if search:
-        # Enhanced search with keyword normalization
+        # Normalize search terms to lowercase for case-insensitive matching
         search_terms = search.lower().strip()
         
-        # Handle plural/singular forms (dress/dresses, shirt/shirts, etc.)
+        # Handle plural/singular form variations for better search results
+        # This improves search accuracy by matching both "dress" and "dresses"
         normalized_terms = []
         for term in search_terms.split():
-            # Simple pluralization handling
+            # Simple pluralization handling for common English patterns
             if term.endswith('s') and len(term) > 3:
-                # Try both singular and plural forms
+                # Try both singular and plural forms for existing plurals
                 normalized_terms.extend([term, term[:-1]])
             else:
-                # Try both singular and plural forms
+                # Try both singular and plural forms for singular terms
                 normalized_terms.extend([term, term + 's'])
         
-        # Create regex pattern for flexible matching
+        # Create regex pattern for flexible matching across multiple fields
+        # The 'i' option enables case-insensitive matching
         search_pattern = '|'.join(normalized_terms)
         
+        # Build MongoDB $or query for multi-field search
+        # This searches across title, description, and metadata fields
         query['$or'] = [
             {'title': {'$regex': search_pattern, '$options': 'i'}},
             {'description': {'$regex': search_pattern, '$options': 'i'}},
@@ -74,15 +141,21 @@ def index():
     # Get products with pagination
     products = list(products_collection.find(query).skip(skip).limit(per_page))
     
-    # Calculate average rating for each product
+    # Calculate average rating and AI analysis count for each product
     for product in products:
         if product.get('reviews'):
             ratings = [review.get('rating', 0) for review in product['reviews'] if review.get('rating')]
             product['avg_rating'] = sum(ratings) / len(ratings) if ratings else 0.0
             product['review_count'] = len(ratings)
+            
+            # Count reviews with AI predictions
+            ai_analyzed_count = sum(1 for review in product['reviews'] 
+                                  if review.get('ml_prediction') is not None)
+            product['ai_analyzed_count'] = ai_analyzed_count
         else:
             product['avg_rating'] = 0.0
             product['review_count'] = 0
+            product['ai_analyzed_count'] = 0
     
     # Get user wishlist if logged in
     user_wishlist = []
@@ -165,7 +238,12 @@ def product_detail(clothing_id):
     recommended_reviews = []
     not_recommended_reviews = []
     
-    for review in product.get('reviews', []):
+    # Sort reviews by creation date (newest first)
+    sorted_reviews = sorted(product.get('reviews', []), 
+                          key=lambda x: x.get('created_at', ''), 
+                          reverse=True)
+    
+    for review in sorted_reviews:
         # Use final_decision if available, otherwise use ml_prediction
         decision = review.get('final_decision')
         if decision is None:

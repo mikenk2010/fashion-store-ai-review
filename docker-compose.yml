@@ -66,8 +66,9 @@ services:
       sh -c "
         echo 'Waiting for MongoDB to be ready...' &&
         sleep 10 &&
-        echo 'Loading data and starting application...' &&
-        python -m src.utils.database &&
+        echo 'Running complete setup...' &&
+        python -m src.utils.complete_setup &&
+        echo 'Starting application...' &&
         python main.py
       "
 

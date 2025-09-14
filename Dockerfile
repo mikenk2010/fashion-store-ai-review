@@ -29,6 +29,8 @@ COPY main.py .
 # Copy data and create necessary directories
 COPY data/ ./data/
 COPY models/ ./models/
+COPY static/ ./static/
+COPY migrate/ ./migrate/
 RUN mkdir -p logs
 
 # Expose port

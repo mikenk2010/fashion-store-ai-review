@@ -36,7 +36,7 @@
         {% if product.recommended_reviews %}
         <div class="card mb-4 mt-4">
             <div class="card-header bg-success text-white">
-                <h6><i class="fas fa-thumbs-up me-2"></i>Recommended Reviews ({{ product.recommended_reviews|length }})</h6>
+                <h6><i class="fas fa-thumbs-up me-2"></i>Recommended Reviews ({{ product.recommended_reviews|length }}) - Most Recent</h6>
             </div>
             <div class="card-body">
                 {% for review in product.recommended_reviews[:5] %}
@@ -51,7 +51,7 @@
                                 {% endif %}
                             {% endfor %}
                         </div>
-                        <small class="text-muted">{{ review.created_at[:10] if review.created_at else 'N/A' }}</small>
+                        <small class="text-muted">{{ review.created_at | format_relative_time if review.created_at else 'N/A' }}</small>
                     </div>
                     
                     {% if review.title %}
@@ -97,7 +97,7 @@
         {% if product.not_recommended_reviews %}
         <div class="card mt-4">
             <div class="card-header bg-danger text-white">
-                <h6><i class="fas fa-thumbs-down me-2"></i>Not Recommended Reviews ({{ product.not_recommended_reviews|length }})</h6>
+                <h6><i class="fas fa-thumbs-down me-2"></i>Not Recommended Reviews ({{ product.not_recommended_reviews|length }}) - Most Recent</h6>
             </div>
             <div class="card-body">
                 {% for review in product.not_recommended_reviews[:5] %}
@@ -112,7 +112,7 @@
                                 {% endif %}
                             {% endfor %}
                         </div>
-                        <small class="text-muted">{{ review.created_at[:10] if review.created_at else 'N/A' }}</small>
+                        <small class="text-muted">{{ review.created_at | format_relative_time if review.created_at else 'N/A' }}</small>
                     </div>
                     
                     {% if review.title %}

@@ -2,6 +2,12 @@
 """
 ML Utilities for Review Classification
 Handles model loading, prediction, and ensemble fusion
+
+Authors: 
+- Hoang Chau Le <s3715228@rmit.edu.vn>
+- Bao Nguyen <s4139514@rmit.edu.vn>
+
+Version: 1.0.0
 """
 
 import os
@@ -28,6 +34,9 @@ class ReviewClassifier:
         self.scaler_weighted = None
         self.nlp = None
         self.models_loaded = False
+        
+        # Load models automatically
+        self.load_models()
         
     def load_models(self):
         """Load all pre-trained models and preprocessors"""

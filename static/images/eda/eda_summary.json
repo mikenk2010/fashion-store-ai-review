@@ -1,0 +1,162 @@
+{
+  "dataset_info": {
+    "shape": "(19662, 12)",
+    "missing_values": {},
+    "dtypes": {
+      "Clothing ID": "int64",
+      "Age": "int64",
+      "Title": "object",
+      "Review Text": "object",
+      "Rating": "int64",
+      "Recommended IND": "int64",
+      "Positive Feedback Count": "int64",
+      "Division Name": "object",
+      "Department Name": "object",
+      "Class Name": "object",
+      "Clothes Title": "object",
+      "Clothes Description": "object"
+    }
+  },
+  "rating_analysis": {
+    "rating_counts": {
+      "1": "691",
+      "2": "1360",
+      "3": "2464",
+      "4": "4289",
+      "5": "10858"
+    },
+    "average_rating": 4.183145153087173,
+    "median_rating": 5.0
+  },
+  "recommendation_analysis": {
+    "recommended_count": 16087,
+    "not_recommended_count": 3575,
+    "recommendation_rate": 81.81771945885464
+  },
+  "department_analysis": {
+    "Review_Count": {
+      "Tops": "8713",
+      "Dresses": "5371",
+      "Bottoms": "3184",
+      "Intimate": "1408",
+      "Jackets": "879",
+      "Trend": "107"
+    },
+    "Avg_Rating": {
+      "Tops": "4.156",
+      "Dresses": "4.137",
+      "Bottoms": "4.288",
+      "Intimate": "4.258",
+      "Jackets": "4.271",
+      "Trend": "3.86"
+    },
+    "Recommendation_Rate": {
+      "Tops": "80.9",
+      "Dresses": "80.30000000000001",
+      "Bottoms": "85.3",
+      "Intimate": "84.6",
+      "Jackets": "84.1",
+      "Trend": "75.7"
+    }
+  },
+  "age_analysis": {
+    "age_stats": {
+      "count": "19662.0",
+      "mean": "43.26080764927271",
+      "std": "12.258122303249822",
+      "min": "18.0",
+      "25%": "34.0",
+      "50%": "41.0",
+      "75%": "52.0",
+      "max": "99.0"
+    },
+    "age_rating_analysis": {
+      "count": {
+        "(17.919, 34.2]": "5069",
+        "(34.2, 50.4]": "9281",
+        "(50.4, 66.6]": "4586",
+        "(66.6, 82.8]": "658",
+        "(82.8, 99.0]": "68"
+      },
+      "mean": {
+        "(17.919, 34.2]": "4.142828960347209",
+        "(34.2, 50.4]": "4.162805732140933",
+        "(50.4, 66.6]": "4.254906236371566",
+        "(66.6, 82.8]": "4.24468085106383",
+        "(82.8, 99.0]": "4.529411764705882"
+      }
+    }
+  },
+  "text_analysis": {
+    "review_length_stats": {
+      "count": "19662.0",
+      "mean": "318.4448174143017",
+      "std": "142.26845036487555",
+      "min": "9.0",
+      "25%": "199.0",
+      "50%": "315.0",
+      "75%": "475.0",
+      "max": "508.0"
+    },
+    "title_length_stats": {
+      "count": "19662.0",
+      "mean": "19.09892177804903",
+      "std": "9.580299425414683",
+      "min": "2.0",
+      "25%": "12.0",
+      "50%": "17.0",
+      "75%": "24.0",
+      "max": "52.0"
+    }
+  },
+  "correlation_analysis": {
+    "Rating": {
+      "Rating": "1.0",
+      "Age": "0.03491028137272104",
+      "Recommended IND": "0.7931451235187228",
+      "Positive Feedback Count": "-0.05665872484412981",
+      "Review_Length": "-0.054845460123071454",
+      "Title_Length": "-0.08954424995684737"
+    },
+    "Age": {
+      "Rating": "0.03491028137272104",
+      "Age": "1.0",
+      "Recommended IND": "0.03540711449318293",
+      "Positive Feedback Count": "0.04116703686856373",
+      "Review_Length": "0.0221886077438059",
+      "Title_Length": "-0.01565982868468954"
+    },
+    "Recommended IND": {
+      "Rating": "0.7931451235187228",
+      "Age": "0.03540711449318293",
+      "Recommended IND": "1.0",
+      "Positive Feedback Count": "-0.05945233034924598",
+      "Review_Length": "-0.027639570584869662",
+      "Title_Length": "-0.05696185356455935"
+    },
+    "Positive Feedback Count": {
+      "Rating": "-0.05665872484412981",
+      "Age": "0.04116703686856373",
+      "Recommended IND": "-0.05945233034924598",
+      "Positive Feedback Count": "1.0",
+      "Review_Length": "0.19250649897587338",
+      "Title_Length": "0.0763155920913831"
+    },
+    "Review_Length": {
+      "Rating": "-0.054845460123071454",
+      "Age": "0.0221886077438059",
+      "Recommended IND": "-0.027639570584869662",
+      "Positive Feedback Count": "0.19250649897587338",
+      "Review_Length": "1.0",
+      "Title_Length": "0.2249230937375746"
+    },
+    "Title_Length": {
+      "Rating": "-0.08954424995684737",
+      "Age": "-0.01565982868468954",
+      "Recommended IND": "-0.05696185356455935",
+      "Positive Feedback Count": "0.0763155920913831",
+      "Review_Length": "0.2249230937375746",
+      "Title_Length": "1.0"
+    }
+  }
+}

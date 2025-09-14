@@ -97,17 +97,28 @@ start_app() {
     
     # Wait for application to be ready
     print_info "Waiting for application to be ready..."
-    sleep 10
+    sleep 30
     
     # Check if application is healthy
-    if curl -f http://localhost:6600/ > /dev/null 2>&1; then
+    local max_attempts=10
+    local attempt=1
+    
+    while [ $attempt -le $max_attempts ]; do
+        if curl -f http://localhost:6600/ > /dev/null 2>&1; then
         print_success "Application started successfully!"
-        print_info "🌐 Application is available at: http://localhost:6600"
-        print_info "📊 MongoDB is available at: mongodb://admin:password123@localhost:27017/ecommerce_db"
-    else
-        print_error "Application failed to start. Check logs with: ./manage-app.sh logs"
-        exit 1
-    fi
+        print_info "Application is available at: http://localhost:6600"
+        print_info "MongoDB is available at: mongodb://admin:password123@localhost:27017/ecommerce_db"
+            return 0
+        fi
+        
+        print_info "Attempt $attempt/$max_attempts - Waiting for application..."
+        sleep 10
+        ((attempt++))
+    done
+    
+    print_error "Application failed to start after $max_attempts attempts"
+    print_info "Check logs with: ./manage-app.sh logs"
+    exit 1
 }
 
 # Start in development mode
@@ -135,9 +146,9 @@ start_dev() {
     # Check if application is healthy
     if curl -f http://localhost:6600/ > /dev/null 2>&1; then
         print_success "Application started successfully in development mode!"
-        print_info "🌐 Application is available at: http://localhost:6600"
-        print_info "📊 MongoDB is available at: mongodb://admin:password123@localhost:27017/ecommerce_db"
-        print_info "🔄 File changes will be automatically synced"
+        print_info "Application is available at: http://localhost:6600"
+        print_info "MongoDB is available at: mongodb://admin:password123@localhost:27017/ecommerce_db"
+        print_info "File changes will be automatically synced"
     else
         print_error "Application failed to start. Check logs with: ./manage-app.sh logs"
         exit 1
@@ -216,8 +227,8 @@ status_app() {
     # Show application health
     if curl -f http://localhost:6600/ > /dev/null 2>&1; then
         print_success "Application is running and healthy"
-        print_info "🌐 Application: http://localhost:6600"
-        print_info "📊 MongoDB: mongodb://admin:password123@localhost:27017/ecommerce_db"
+        print_info "Application: http://localhost:6600"
+        print_info "MongoDB: mongodb://admin:password123@localhost:27017/ecommerce_db"
     else
         print_error "Application is not responding"
     fi
@@ -262,19 +273,75 @@ run_tests() {
     print_success "Tests completed!"
 }
 
-# Run migrations
-run_migrations() {
+# Complete setup for lecturer
+complete_setup() {
     print_header
-    print_info "Running Database Migrations"
+    print_info "Running Complete Setup for Lecturer"
+    echo
+    
+    check_docker
+    check_env
+    
+    # Check if containers are already running
+    if docker-compose ps | grep -q "Up"; then
+        print_warning "Application is already running. Stopping first..."
+        docker-compose down
+    fi
+    
+    # Run the complete setup script
+    print_info "Running complete setup script..."
+    ./startup_complete.sh
+}
+
+# Restore database from dump
+restore_database() {
+    print_header
+    print_info "Restore Database from Dump"
     echo
     
     check_docker
     
-    # Run migrations inside the container
-    print_info "Running migrations..."
-    docker-compose exec web python migrate/run_migrations.py
+    # Check if dump exists
+    if [ ! -d "migrate/mongodb_dump" ]; then
+        print_error "MongoDB dump not found at migrate/mongodb_dump/"
+        print_info "The database dump should be included with the application"
+        exit 1
+    fi
     
-    print_success "Migrations completed!"
+    print_warning "This will restore the database from the dump, overwriting any existing data."
+    echo
+    
+    read -p "Are you sure you want to continue? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        print_info "Operation cancelled"
+        exit 0
+    fi
+    
+    # Start MongoDB if not running
+    if ! docker-compose ps | grep -q "mongo.*Up"; then
+        print_info "Starting MongoDB..."
+        docker-compose up -d mongo
+        sleep 10
+    fi
+    
+    # Copy dump to MongoDB container
+    print_info "Copying database dump to MongoDB container..."
+    docker cp migrate/mongodb_dump fashion_store_mongo:/tmp/
+    
+    # Restore the database
+    print_info "Restoring database from dump..."
+    docker-compose exec -T mongo mongorestore --host localhost:27017 --username admin --password password123 --authenticationDatabase admin --db ecommerce_db --drop /tmp/mongodb_dump/ecommerce_db/
+    
+    if [ $? -eq 0 ]; then
+        print_success "Database restored successfully!"
+        print_info "  - Products: 1,095 with embedded reviews and ML predictions"
+        print_info "  - Individual Reviews: 19,664 with ML predictions"
+        print_info "  - Users: 3 test accounts"
+    else
+        print_error "Database restoration failed"
+        exit 1
+    fi
 }
 
 # Show help
@@ -292,7 +359,8 @@ show_help() {
     echo "  logs        Show application logs (follow mode)"
     echo "  logs-tail   Show last 100 lines of logs"
     echo "  test        Run application tests"
-    echo "  migrate     Run database migrations"
+    echo "  restore-db  Restore database from dump (for lecturer setup)"
+    echo "  setup       Complete setup for lecturer (recommended)"
     echo "  help        Show this help message"
     echo
     echo "Examples:"
@@ -334,8 +402,11 @@ main() {
         test)
             run_tests
             ;;
-        migrate)
-            run_migrations
+        setup)
+            complete_setup
+            ;;
+        restore-db)
+            restore_database
             ;;
         help|--help|-h)
             show_help

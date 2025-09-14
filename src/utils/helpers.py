@@ -1,9 +1,16 @@
 """
 Helper utility functions
+
+Authors: 
+- Hoang Chau Le <s3715228@rmit.edu.vn>
+- Bao Nguyen <s4139514@rmit.edu.vn>
+
+Version: 1.0.0
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any
+import time
 
 def format_currency(amount: float, currency: str = "USD") -> str:
     """Format currency amount"""
@@ -18,6 +25,56 @@ def format_date(date_str: str, format_str: str = "%B %d, %Y") -> str:
             date_obj = date_str
         return date_obj.strftime(format_str)
     except:
+        return str(date_str)
+
+def format_relative_time(date_str: str) -> str:
+    """Format date string as relative time (e.g., '10 seconds ago', '4 minutes ago', '2 weeks ago')"""
+    try:
+        if isinstance(date_str, str):
+            # Parse the date string
+            if 'T' in date_str:
+                date_obj = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+            else:
+                date_obj = datetime.fromisoformat(date_str)
+        else:
+            date_obj = date_str
+        
+        # Ensure we have timezone-aware datetime
+        if date_obj.tzinfo is None:
+            date_obj = date_obj.replace(tzinfo=timezone.utc)
+        
+        # Get current time
+        now = datetime.now(timezone.utc)
+        
+        # Calculate time difference
+        diff = now - date_obj
+        
+        # If more than a month, show full date
+        if diff.days > 30:
+            return date_obj.strftime("%B %d, %Y")
+        
+        # Calculate time components
+        total_seconds = int(diff.total_seconds())
+        
+        if total_seconds < 60:
+            return f"{total_seconds} second{'s' if total_seconds != 1 else ''} ago"
+        elif total_seconds < 3600:  # Less than 1 hour
+            minutes = total_seconds // 60
+            return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+        elif total_seconds < 86400:  # Less than 1 day
+            hours = total_seconds // 3600
+            return f"{hours} hour{'s' if hours != 1 else ''} ago"
+        elif diff.days < 7:  # Less than 1 week
+            days = diff.days
+            return f"{days} day{'s' if days != 1 else ''} ago"
+        elif diff.days < 30:  # Less than 1 month
+            weeks = diff.days // 7
+            return f"{weeks} week{'s' if weeks != 1 else ''} ago"
+        else:
+            return date_obj.strftime("%B %d, %Y")
+            
+    except Exception as e:
+        # Fallback to original date string if parsing fails
         return str(date_str)
 
 def calculate_average_rating(reviews: List[Dict[str, Any]]) -> float:

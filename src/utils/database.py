@@ -1,5 +1,11 @@
 """
 Database utilities
+
+Authors: 
+- Hoang Chau Le <s3715228@rmit.edu.vn>
+- Bao Nguyen <s4139514@rmit.edu.vn>
+
+Version: 1.0.0
 """
 
 import pandas as pd

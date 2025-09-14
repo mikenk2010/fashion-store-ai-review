@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """
 Retrain ML models with proper class imbalance handling
+
+Authors: 
+- Hoang Chau Le <s3715228@rmit.edu.vn>
+- Bao Nguyen <s4139514@rmit.edu.vn>
+
+Version: 1.0.0
 """
 
 import os
