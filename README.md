@@ -359,7 +359,7 @@ asm3-online-shopping/
 
 1. **Clone and setup**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/mikenk2010/fashion-store-ai-review asm3-online-shopping
    cd asm3-online-shopping
    ```
 
