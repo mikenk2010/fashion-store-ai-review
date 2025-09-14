@@ -1,5 +1,23 @@
 """
-API routes
+API routes for Fashion Store application
+
+This module provides RESTful API endpoints for the Fashion Store application,
+handling AJAX requests, real-time data processing, and machine learning
+predictions. It serves as the backend API for dynamic frontend interactions.
+
+Key Features:
+- Real-time review sentiment prediction
+- Product data API for AJAX requests
+- Application statistics and analytics
+- Machine learning model information
+- Error handling and logging
+- JSON response formatting
+
+API Endpoints:
+- /api/products - Product data for AJAX requests
+- /api/stats - Application statistics
+- /api/predict_review - Real-time ML prediction
+- /api/model_info - ML model information
 
 Authors: 
 - Hoang Chau Le <s3715228@rmit.edu.vn>
@@ -16,20 +34,51 @@ from ...utils.auth import login_required, get_current_user
 from ...models import predict_review_sentiment, get_model_info
 from ...config.logging_config import log_ml_prediction, log_api_request, log_exception
 
+# Create Blueprint for API routes
+# This organizes all API endpoints under the /api prefix
 api_bp = Blueprint('api', __name__)
 
 @api_bp.route('/products')
 def api_products():
-    """API endpoint for products (for AJAX requests)"""
+    """
+    API endpoint for products (for AJAX requests)
+    
+    This endpoint provides product data in JSON format for AJAX requests
+    from the frontend. It retrieves all products from the database and
+    converts MongoDB ObjectIds to strings for JSON serialization.
+    
+    Returns:
+        JSON response containing list of all products
+        
+    Note:
+        This endpoint is used by the frontend for dynamic product loading
+        and search functionality without page refreshes.
+    """
     from bson import ObjectId
     
+    # Get database connection and access products collection
     db = get_database_connection()
     products_collection = db.products
     
+    # Retrieve all products, excluding the MongoDB _id field
+    # This reduces response size and avoids ObjectId serialization issues
     products = list(products_collection.find({}, {'_id': 0}))
     
     # Convert ObjectId to string for JSON serialization
+    # MongoDB ObjectIds are not JSON serializable by default
     def convert_objectid(obj):
+        """
+        Recursively convert ObjectId instances to strings
+        
+        This function traverses nested data structures (dicts, lists)
+        and converts any ObjectId instances to strings for JSON serialization.
+        
+        Args:
+            obj: The object to process (can be dict, list, or any other type)
+            
+        Returns:
+            The processed object with ObjectIds converted to strings
+        """
         if isinstance(obj, ObjectId):
             return str(obj)
         elif isinstance(obj, dict):
@@ -39,9 +88,10 @@ def api_products():
         else:
             return obj
     
-    # Convert all ObjectIds in the products
+    # Convert all ObjectIds in the products data
     products = convert_objectid(products)
     
+    # Return products as JSON response
     return jsonify(products)
 
 @api_bp.route('/stats')

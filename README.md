@@ -441,15 +441,6 @@ Key configuration options:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
-
-For questions, issues, or contributions:
-
-1. Check the [documentation](documents/)
-2. Review existing [issues](issues)
-3. Create a new [issue](issues/new)
-4. Contact the development team
-
 ---
 
 *RMIT University - Advanced Programming for Data Science*

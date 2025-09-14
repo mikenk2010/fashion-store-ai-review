@@ -1,5 +1,11 @@
 # Fashion Store Dataset - Exploratory Data Analysis
 
+
+## Authors
+
+- **Hoang Chau Le** <s3715228@rmit.edu.vn>
+- **Bao Nguyen** <s4139514@rmit.edu.vn>
+
 ## Overview
 
 This document presents a comprehensive exploratory data analysis (EDA) of the Fashion Store clothing review dataset. The analysis reveals key insights about customer behavior, product performance, and review patterns that inform the machine learning models and business decisions.
@@ -236,14 +242,5 @@ Key opportunities include improving the Trend category performance and leveragin
 The analysis provides a solid foundation for developing robust machine learning models that can accurately predict customer recommendations while maintaining high confidence levels for business decision-making.
 
 ---
-
-*All visualizations and detailed data are available in the `static/images/eda/` directory.*
-
----
-
-## Authors
-
-- **Hoang Chau Le** <s3715228@rmit.edu.vn>
-- **Bao Nguyen** <s4139514@rmit.edu.vn>
 
 *RMIT University - Advanced Programming for Data Science*

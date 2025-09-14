@@ -1,5 +1,11 @@
 # Fashion Store - System Architecture
 
+
+## Authors
+
+- **Hoang Chau Le** <s3715228@rmit.edu.vn>
+- **Bao Nguyen** <s4139514@rmit.edu.vn>
+
 ## Overview
 
 The Fashion Store is a modern e-commerce web application built with Flask, MongoDB, and Docker. It features AI-powered review classification using ensemble machine learning models and provides a comprehensive shopping experience with user authentication, product browsing, and review management.
@@ -330,10 +336,5 @@ Ensemble Voting → Confidence Calculation → API Response
 This architecture provides a robust, scalable, and maintainable foundation for the Fashion Store e-commerce application, ensuring high performance, security, and user experience.
 
 ---
-
-## Authors
-
-- **Hoang Chau Le** <s3715228@rmit.edu.vn>
-- **Bao Nguyen** <s4139514@rmit.edu.vn>
 
 *RMIT University - Advanced Programming for Data Science*
