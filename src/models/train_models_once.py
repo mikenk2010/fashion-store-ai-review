@@ -27,7 +27,7 @@ def main():
     # Check if models already exist
     if check_models_exist():
         print("[SUCCESS] Models already exist!")
-        print("📁 Found model files:")
+        print("Found model files:")
         for model_file in [
             'models/lr_model.pkl',
             'models/rf_model.pkl', 
@@ -44,7 +44,7 @@ def main():
         return 0
     
     print("🔍 Models not found, starting training...")
-    print(f"⏰ Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     try:
         # Import and run the training

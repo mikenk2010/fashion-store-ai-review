@@ -148,16 +148,16 @@ def log_ml_training_start(model_name, dataset_size, features_used):
     ml_logger.info(f"[START] Starting ML training for {model_name}")
     ml_logger.info(f"[DATA] Dataset size: {dataset_size} samples")
     ml_logger.info(f"[PROCESS] Features used: {', '.join(features_used)}")
-    ml_logger.info(f"⏰ Training started at: {datetime.now().isoformat()}")
+    ml_logger.info(f"Training started at: {datetime.now().isoformat()}")
 
 def log_ml_training_complete(model_name, accuracy, training_time, model_path):
     """Log the completion of ML model training"""
     ml_logger = logging.getLogger('ml_training')
     ml_logger.info(f"[SUCCESS] ML training completed for {model_name}")
     ml_logger.info(f"[TARGET] Accuracy: {accuracy:.4f}")
-    ml_logger.info(f"⏱️  Training time: {training_time:.2f} seconds")
-    ml_logger.info(f"💾 Model saved to: {model_path}")
-    ml_logger.info(f"⏰ Training completed at: {datetime.now().isoformat()}")
+    ml_logger.info(f"⏱Training time: {training_time:.2f} seconds")
+    ml_logger.info(f"Model saved to: {model_path}")
+    ml_logger.info(f"Training completed at: {datetime.now().isoformat()}")
 
 def log_ml_prediction(review_text, prediction, confidence, model_used, user_override=None):
     """Log ML prediction results"""
@@ -170,7 +170,7 @@ def log_ml_prediction(review_text, prediction, confidence, model_used, user_over
         'model_used': model_used,
         'user_override': user_override
     }
-    ml_logger.info(f"🔮 ML Prediction: {json.dumps(prediction_data, cls=JSONEncoder)}")
+    ml_logger.info(f"ML Prediction: {json.dumps(prediction_data, cls=JSONEncoder)}")
 
 def log_api_request(endpoint, method, status_code, response_time, user_id=None, error=None):
     """Log API request details"""
@@ -184,7 +184,7 @@ def log_api_request(endpoint, method, status_code, response_time, user_id=None, 
         'user_id': user_id,
         'error': error
     }
-    api_logger.info(f"🌐 API Request: {json.dumps(request_data, cls=JSONEncoder)}")
+    api_logger.info(f"API Request: {json.dumps(request_data, cls=JSONEncoder)}")
 
 def log_database_operation(operation, collection, document_id=None, success=True, error=None):
     """Log database operations"""
@@ -197,7 +197,7 @@ def log_database_operation(operation, collection, document_id=None, success=True
         'success': success,
         'error': str(error) if error else None
     }
-    db_logger.info(f"🗄️  Database: {json.dumps(db_data, cls=JSONEncoder)}")
+    db_logger.info(f"Database: {json.dumps(db_data, cls=JSONEncoder)}")
 
 def log_user_action(action, user_id, details=None, success=True):
     """Log user actions"""
@@ -209,7 +209,7 @@ def log_user_action(action, user_id, details=None, success=True):
         'details': details,
         'success': success
     }
-    user_logger.info(f"👤 User Action: {json.dumps(action_data, cls=JSONEncoder)}")
+    user_logger.info(f"User Action: {json.dumps(action_data, cls=JSONEncoder)}")
 
 def log_exception(exception, context=None):
     """Log exceptions with context"""

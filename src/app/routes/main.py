@@ -258,9 +258,7 @@ def product_detail(clothing_id):
     product['recommended_reviews'] = recommended_reviews
     product['not_recommended_reviews'] = not_recommended_reviews
     
-    return render_template('product_detail.html', 
-                         product=product,
-                         review_stats=review_stats)
+    return render_template('product_detail.html', product=product, review_stats=review_stats)
 
 @main_bp.route('/profile')
 @login_required
@@ -334,9 +332,7 @@ def review_confirmation():
         flash('Product not found.', 'error')
         return redirect(url_for('main.index'))
     
-    return render_template('review_confirmation.html', 
-                         review_data=review_data, 
-                         product=product)
+    return render_template('review_confirmation.html', review_data=review_data, product=product)
 
 @main_bp.route('/confirm_review', methods=['POST'])
 @login_required
@@ -347,7 +343,7 @@ def confirm_review():
         flash('No pending review found.', 'error')
         return redirect(url_for('main.index'))
     
-    # Get user's decision
+    # Get user decision
     user_decision = request.form.get('decision')  # 'accept' or 'override'
     override_decision = request.form.get('override_decision')  # 'recommended' or 'not_recommended'
     override_reason = request.form.get('override_reason', '').strip()

@@ -248,7 +248,8 @@ class ReviewClassifier:
             # Return empty result if text preprocessing failed
             if not processed_text:
                 return None, 0.0, {}
-            
+
+            # Extract features for each model
             # Prepare features for each machine learning model
             # Each model uses different feature extraction methods
             
@@ -305,11 +306,13 @@ class ReviewClassifier:
             # This combines the three model predictions for a more robust result
             predictions = [lr_pred, rf_pred, svm_pred]
             ensemble_pred = max(set(predictions), key=predictions.count)
-            
+
+            # MOST IMPORTANT
             # Calculate ensemble confidence as average of individual probabilities
             # This provides a measure of overall model agreement
             ensemble_prob = (lr_prob + rf_prob + svm_prob) / 3
-            
+
+            # CUSTOMER DOUBLE CONFORM AGAIN
             # Check if all models agree (consensus)
             # High consensus indicates more reliable predictions
             consensus = len(set(predictions)) == 1

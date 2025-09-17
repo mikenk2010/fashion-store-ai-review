@@ -56,7 +56,7 @@ def load_spacy_model():
         print("[SUCCESS] spaCy model loaded successfully")
         return nlp
     except OSError:
-        print("[ERROR] spaCy model 'en_core_web_md' not found. Installing...")
+        print("[ERROR] spaCy model 'en_core_web_md' not found. Installing")
         os.system("python -m spacy download en_core_web_md")
         nlp = spacy.load("en_core_web_md")
         print("[SUCCESS] spaCy model installed and loaded")
@@ -102,16 +102,16 @@ def get_tfidf_weighted_embeddings(texts, nlp, tfidf_vectorizer):
 
 def train_models():
     """Train all three models with different feature representations"""
-    ml_logger.info("[START] Starting Advanced ML Model Training...")
-    print("[START] Starting Advanced ML Model Training...")
+    ml_logger.info("[START] Starting Advanced ML Model Training")
+    print("[START] Starting Advanced ML Model Training")
     
     try:
         # Load spaCy model
         nlp = load_spacy_model()
     
         # Load dataset
-        ml_logger.info("[DATA] Loading dataset...")
-        print("[DATA] Loading dataset...")
+        ml_logger.info("[DATA] Loading dataset")
+        print("[DATA] Loading dataset")
         df = pd.read_csv('data/data-assignment3_II.csv')
         
         dataset_size = len(df)
@@ -133,7 +133,7 @@ def train_models():
         print(f"After removing missing values: {final_dataset_size} reviews")
     
     # Preprocess the text
-    print("[PROCESS] Preprocessing text...")
+    print("[PROCESS] Preprocessing text")
     df['cleaned_text'] = df['Review Text'].apply(preprocess_text)
     
     # Remove empty reviews after preprocessing
@@ -157,10 +157,10 @@ def train_models():
     print(f"Test set: {len(X_test)} samples")
     
     # Create feature representations
-    print("\n🔨 Creating feature representations...")
+    print("\nCreating feature representations")
     
     # 1. Bag of Words (BoW) - for Logistic Regression
-    print("Creating Bag of Words features...")
+    print("Creating Bag of Words features")
     bow_vectorizer = CountVectorizer(
         max_features=5000,
         stop_words='english',
@@ -172,7 +172,7 @@ def train_models():
     X_test_bow = bow_vectorizer.transform(X_test)
     
     # 2. TF-IDF - for weighted embeddings
-    print("Creating TF-IDF features...")
+    print("Creating TF-IDF features")
     tfidf_vectorizer = TfidfVectorizer(
         max_features=5000,
         stop_words='english',
@@ -184,12 +184,12 @@ def train_models():
     X_test_tfidf = tfidf_vectorizer.transform(X_test)
     
     # 3. spaCy Unweighted Embeddings - for Random Forest
-    print("Creating spaCy unweighted embeddings...")
+    print("Creating spaCy unweighted embeddings")
     X_train_embeddings = get_spacy_embeddings(X_train.tolist(), nlp)
     X_test_embeddings = get_spacy_embeddings(X_test.tolist(), nlp)
     
     # 4. TF-IDF Weighted Embeddings - for SVM
-    print("Creating TF-IDF weighted embeddings...")
+    print("Creating TF-IDF weighted embeddings")
     X_train_weighted = get_tfidf_weighted_embeddings(X_train.tolist(), nlp, tfidf_vectorizer)
     X_test_weighted = get_tfidf_weighted_embeddings(X_test.tolist(), nlp, tfidf_vectorizer)
     
@@ -203,57 +203,57 @@ def train_models():
     X_test_weighted_scaled = scaler_weighted.transform(X_test_weighted)
     
     # Train models
-    print("\n[ML] Training models...")
+    print("\n[ML] Training models")
     
-        # 1. Logistic Regression with BoW
-        print("Training Logistic Regression (BoW)...")
-        ml_logger.info("[PROCESS] Training Logistic Regression with Bag-of-Words features...")
-        lr_start_time = time.time()
-        
-        lr_model = LogisticRegression(
-            random_state=42,
-            max_iter=1000,
-            class_weight='balanced'
-        )
-        lr_model.fit(X_train_bow, y_train)
-        
-        lr_training_time = time.time() - lr_start_time
-        ml_logger.info(f"[SUCCESS] Logistic Regression training completed in {lr_training_time:.2f} seconds")
-    
-        # 2. Random Forest with Unweighted Embeddings
-        print("Training Random Forest (Unweighted Embeddings)...")
-        ml_logger.info("🌲 Training Random Forest with Unweighted Embeddings...")
-        rf_start_time = time.time()
-        
-        rf_model = RandomForestClassifier(
-            n_estimators=100,
-            random_state=42,
-            class_weight='balanced',
-            n_jobs=-1
-        )
-        rf_model.fit(X_train_embeddings_scaled, y_train)
-        
-        rf_training_time = time.time() - rf_start_time
-        ml_logger.info(f"[SUCCESS] Random Forest training completed in {rf_training_time:.2f} seconds")
-    
-        # 3. SVM with TF-IDF Weighted Embeddings
-        print("Training SVM (TF-IDF Weighted Embeddings)...")
-        ml_logger.info("[TARGET] Training SVM with TF-IDF Weighted Embeddings...")
-        svm_start_time = time.time()
-        
-        svm_model = SVC(
-            kernel='rbf',
-            random_state=42,
-            class_weight='balanced',
-            probability=True
-        )
-        svm_model.fit(X_train_weighted_scaled, y_train)
-        
-        svm_training_time = time.time() - svm_start_time
-        ml_logger.info(f"[SUCCESS] SVM training completed in {svm_training_time:.2f} seconds")
+    # 1. Logistic Regression with BoW
+    print("Training Logistic Regression (BoW)")
+    ml_logger.info("[PROCESS] Training Logistic Regression with Bag-of-Words features")
+    lr_start_time = time.time()
+
+    lr_model = LogisticRegression(
+        random_state=42,
+        max_iter=1000,
+        class_weight='balanced'
+    )
+    lr_model.fit(X_train_bow, y_train)
+
+    lr_training_time = time.time() - lr_start_time
+    ml_logger.info(f"[SUCCESS] Logistic Regression training completed in {lr_training_time:.2f} seconds")
+
+    # 2. Random Forest with Unweighted Embeddings
+    print("Training Random Forest (Unweighted Embeddings)")
+    ml_logger.info("Training Random Forest with Unweighted Embeddings")
+    rf_start_time = time.time()
+
+    rf_model = RandomForestClassifier(
+        n_estimators=100,
+        random_state=42,
+        class_weight='balanced',
+        n_jobs=-1
+    )
+    rf_model.fit(X_train_embeddings_scaled, y_train)
+
+    rf_training_time = time.time() - rf_start_time
+    ml_logger.info(f"[SUCCESS] Random Forest training completed in {rf_training_time:.2f} seconds")
+
+    # 3. Support Vector Machine (SVM) with TF-IDF Weighted Embeddings
+    print("Training SVM (TF-IDF Weighted Embeddings)")
+    ml_logger.info("[TARGET] Training SVM with TF-IDF Weighted Embeddings")
+    svm_start_time = time.time()
+
+    svm_model = SVC(
+        kernel='rbf',
+        random_state=42,
+        class_weight='balanced',
+        probability=True
+    )
+    svm_model.fit(X_train_weighted_scaled, y_train)
+
+    svm_training_time = time.time() - svm_start_time
+    ml_logger.info(f"[SUCCESS] SVM training completed in {svm_training_time:.2f} seconds")
     
     # Evaluate models
-    print("\n[EVAL] Evaluating models...")
+    print("\n[EVAL] Evaluating models")
     
     models = {
         'Logistic Regression': (lr_model, X_test_bow),
@@ -293,9 +293,9 @@ def train_models():
         print("\nClassification Report:")
         print(classification_report(y_test, y_pred, target_names=['Not Recommended', 'Recommended']))
     
-    # Save models and preprocessors
-        print("\n💾 Saving models and preprocessors...")
-        ml_logger.info("💾 Saving trained models and preprocessors...")
+        # Save models and preprocessors
+        print("\nSaving models and preprocessors")
+        ml_logger.info("Saving trained models and preprocessors")
         os.makedirs('models', exist_ok=True)
         
         # Save models
@@ -317,7 +317,7 @@ def train_models():
         print("[SUCCESS] All models and preprocessors saved successfully!")
     
     # Test ensemble prediction
-    print("\n[TARGET] Testing ensemble prediction...")
+    print("\n[TARGET] Testing ensemble prediction")
     test_review = "This dress is amazing! I love the fit and quality."
     test_processed = preprocess_text(test_review)
     

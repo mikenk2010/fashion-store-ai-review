@@ -2,6 +2,7 @@
 """
 ML Model Training Script for Review Classification
 Trains a Logistic Regression model using TF-IDF vectorization
+Development/Testing version - To quickly test the ML models
 """
 
 import pandas as pd
@@ -30,7 +31,12 @@ def preprocess_text(text):
     
     return text
 
+# This script runs once during setup to train models on the full dataset
 def train_review_classifier():
+    # Loads CSV data
+    # Preprocesses text
+    # Trains 3 models (LR, RF, SVM)
+    # Saves models to disk
     """Train the review classification model"""
     print("Loading dataset...")
     
