@@ -92,6 +92,19 @@ def main():
     # The debug parameter controls detailed error pages and auto-reload functionality
     app.run(host=host, port=port, debug=app.config['DEBUG'])
 
+# Create app instance for Gunicorn
+# This allows Gunicorn to import the app directly
+config_class = DevelopmentConfig if os.getenv('FLASK_ENV') == 'development' else ProductionConfig
+app = create_app(config_class)
+
+# Load ML models when app is created
+if not load_ml_models():
+    print("Warning: ML models not loaded. Review classification will not work.")
+    print("Please ensure model files are present in the models/ directory.")
+
+# Load product data when app is created
+load_products_from_csv()
+
 # Standard Python idiom to ensure main() only runs when script is executed directly
 # This prevents the main function from running when the module is imported
 if __name__ == '__main__':
